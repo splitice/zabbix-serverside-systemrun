@@ -33,7 +33,7 @@ int	zbx_module_system_run(AGENT_REQUEST *request, AGENT_RESULT *result);
 static ZBX_METRIC keys[] =
 /*      KEY                     FLAG		FUNCTION        	TEST PARAMETERS */
 {
-	{"system.run",		0,		zbx_module_system_run,	NULL},
+	{"system.simple_run",		0,		zbx_module_system_run,	NULL},
 	{NULL}
 };
 
