@@ -19,6 +19,11 @@
 
 #include "sysinc.h"
 #include "module.h"
+#include "common.h"
+#include "sysinfo.h"
+
+#include "log.h"
+
 
 /* the variable keeps timeout setting for item processing */
 static int	item_timeout = 0;
