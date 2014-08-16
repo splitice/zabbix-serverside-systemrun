@@ -33,7 +33,7 @@ int	zbx_module_system_run(AGENT_REQUEST *request, AGENT_RESULT *result);
 static ZBX_METRIC keys[] =
 /*      KEY                     FLAG		FUNCTION        	TEST PARAMETERS */
 {
-	{"system.simple_run",		0,		zbx_module_system_run,	NULL},
+	{"system.simple_run",		CF_HAVEPARAMS,		zbx_module_system_run,	"echo test"},
 	{NULL}
 };
 
@@ -80,28 +80,64 @@ ZBX_METRIC	*zbx_module_item_list()
 	return keys;
 }
 
+int	execute_str_mod(const char *command, AGENT_RESULT *result)
+{
+	int	ret = SYSINFO_RET_FAIL;
+	char	*cmd_result = NULL, error[MAX_STRING_LEN];
+
+	assert(result);
+
+	init_result(result);
+
+	if (SUCCEED != zbx_execute(command, &cmd_result, error, sizeof(error), item_timeout))
+	{
+		SET_MSG_RESULT(result, zbx_strdup(NULL, error));
+		goto lbl_exit;
+	}
+
+	zbx_rtrim(cmd_result, ZBX_WHITESPACE);
+
+	zabbix_log(LOG_LEVEL_DEBUG, "Run remote command [%s] Result [%d] [%.20s]...",
+			command, strlen(cmd_result), cmd_result);
+
+	if ('\0' == *cmd_result)	/* we got whitespace only */
+		goto lbl_exit;
+
+	SET_TEXT_RESULT(result, zbx_strdup(NULL, cmd_result));
+
+	ret = SYSINFO_RET_OK;
+lbl_exit:
+	zbx_free(cmd_result);
+
+	return ret;
+}
+
 int	zbx_module_system_run(AGENT_REQUEST *request, AGENT_RESULT *result)
 {
 	char	*command, *flag;
 
-	if (2 < request->nparam)
+	if (2 < request->nparam){
+		SET_MSG_RESULT(result, strdup("Incorrect number of parameters given"));
 		return SYSINFO_RET_FAIL;
+	}
 
 	command = get_rparam(request, 0);
 	flag = get_rparam(request, 1);
 
-	if (NULL == command || '\0' == *command)
+	if (NULL == command || '\0' == *command){
+		SET_MSG_RESULT(result, strdup("Incorrect command given"));
 		return SYSINFO_RET_FAIL;
+	}
 
-	if (1 == CONFIG_LOG_REMOTE_COMMANDS)
-		zabbix_log(LOG_LEVEL_WARNING, "Executing command '%s'", command);
-	else
-		zabbix_log(LOG_LEVEL_DEBUG, "Executing command '%s'", command);
+	//zabbix_log(LOG_LEVEL_WARNING, "Executing command '%s'", command);
+	zabbix_log(LOG_LEVEL_DEBUG, "Executing command '%s'", command);
 
 	if (NULL == flag || '\0' == *flag || 0 == strcmp(flag, "wait"))	/* default parameter */
-		return EXECUTE_STR(command, result);
-	else if (0 != strcmp(flag, "nowait") || SUCCEED != zbx_execute_nowait(command))
+		return execute_str_mod(command, result);
+	else if (0 != strcmp(flag, "nowait") || SUCCEED != zbx_execute_nowait(command)){
+		SET_MSG_RESULT(result, strdup("Execution Failed"));
 		return SYSINFO_RET_FAIL;
+	}
 
 	SET_UI64_RESULT(result, 1);
 
