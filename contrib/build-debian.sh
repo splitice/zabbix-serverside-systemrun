@@ -5,7 +5,7 @@ cd /tmp
 mkdir zabbix_build
 cd zabbix_build
 
-wget 'http://downloads.sourceforge.net/project/zabbix/ZABBIX%20Latest%20Stable/2.2.6/zabbix-2.2.6.tar.gz?r=http%3A%2F%2Fwww.zabbix.com%2Fdownload.php&ts=1409716972&use_mirror=aarnet' -O z.tar.gz
+wget 'http://downloads.sourceforge.net/project/zabbix/ZABBIX%20Latest%20Stable/2.4.0/zabbix-2.4.0.tar.gz?r=&ts=1412677518&use_mirror=aarnet' -O z.tar.gz
 tar -zxvf z.tar.gz
 cd zabbix-*
 ./configure
