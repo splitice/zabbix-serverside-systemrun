@@ -26,7 +26,7 @@
 
 
 /* the variable keeps timeout setting for item processing */
-static int	item_timeout = 0;
+static int	item_timeout = 60;//Default to 60s
 
 int	zbx_module_system_run(AGENT_REQUEST *request, AGENT_RESULT *result);
 
